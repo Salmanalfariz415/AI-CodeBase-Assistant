@@ -40,7 +40,7 @@ function chunkFileContent(filePath, chunkSize = 1000, chunkOverlap = 200) {
             metadata: {
                 fileName: path.basename(filePath),
                 filePath: filePath,// Helps the AI tell you exactly where the code is
-                language: path.extname(filePath).substring(1), // e.g., 'js', 'py' (great for filtering)
+                language: path.extname(filePath).substring(1), // e.g., 'js', 'py' 
                 startIndex: i
             }
         });
