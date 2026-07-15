@@ -2,6 +2,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+const { embedAndStoreChunks } = require('../utils/vectorService');
 const { getAllFiles, chunkFileContent } = require('../utils/chunker'); 
 
 const uploader = (req, res) => {
@@ -30,6 +31,9 @@ const uploader = (req, res) => {
                 const fileChunks = chunkFileContent(filePath);
                 allRepositoryChunks.push(...fileChunks);
             });
+
+            //embedding and storing into vector databases
+            await embedAndStoreChunks(allRepositoryChunks);
 
             res.status(200).json({
                 message: "Repository cloned and chunked successfully!",

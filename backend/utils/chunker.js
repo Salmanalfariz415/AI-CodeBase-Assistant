@@ -44,7 +44,7 @@ function chunkFileContent(filePath, chunkSize = 1000, chunkOverlap = 200) {
                 startIndex: i
             }
         });
-        // Move forward by chunk size minus overlap to keep context continuous
+        // Move forward i by chunk size minus overlap to keep context continuous
         i += (chunkSize - chunkOverlap);
     }
 
