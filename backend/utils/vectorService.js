@@ -70,4 +70,33 @@ async function storeInSupabase(finalizedChunks) {
         throw error;
     }
 }
-module.exports = { generateEmbeddings, storeInSupabase };
+
+async function searchSimilarChunks(userQuery, limit = 5, similarityThreshold = 0.5) {
+    try {
+        console.log(`Embedding user query: "${userQuery}"`);
+
+        // 1. Generate the vector for the user's query (Must use the exact same model!)
+        const embeddingResponse = await openai.embeddings.create({
+            model: 'text-embedding-3-small',
+            input: userQuery,
+        });
+        const queryVector = embeddingResponse.data[0].embedding;
+
+        // 2. Call the Postgres function 'match_code_chunks' created inside Supabase
+        const { data, error } = await supabase.rpc('match_code_chunks', {
+            query_embedding: queryVector,
+            match_threshold: similarityThreshold, // e.g. 0.5 (only return semi-relevant results)
+            match_count: limit                    // How many matches to return
+        });
+
+        if (error) throw error;
+
+        return data; // Returns array of matching rows with their similarity scores
+
+    } catch (error) {
+        console.error("Search pipeline error:", error.message);
+        throw error;
+    }
+}
+
+module.exports = { generateEmbeddings, storeInSupabase, searchSimilarChunks };
