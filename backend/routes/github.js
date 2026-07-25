@@ -1,7 +1,9 @@
-const express=require('express');
-const router=express.Router();
+const express = require('express');
+const router = express.Router();
 
-const control=require('./controllers/gitcontrol');
-router.post('/api/link',control);
+const { uploader } = require('../controllers/uploader');
 
-module.exports=router;
+// define route relative to mount point; server will mount this router at '/api'
+router.post('/link', uploader);
+
+module.exports = router;

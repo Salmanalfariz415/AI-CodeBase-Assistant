@@ -1,0 +1,6 @@
+{
+  "watch": ["*.js", "controllers", "routes", "utils", ".env"],
+  "ignore": ["cloned_repos/**", "node_modules/**"],
+  "ext": "js,json",
+  "delay": 1000
+}

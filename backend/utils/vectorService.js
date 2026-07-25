@@ -50,7 +50,8 @@ async function storeInSupabase(finalizedChunks) {
                 fileName: chunk.metadata.fileName,
                 filePath: chunk.metadata.filePath,
                 language: chunk.metadata.language,
-                startIndex: chunk.metadata.startIndex
+                startIndex: chunk.metadata.startIndex,
+                repositoryId: chunk.metadata.repositoryId
             }
         }));
 
@@ -71,9 +72,9 @@ async function storeInSupabase(finalizedChunks) {
     }
 }
 
-async function searchSimilarChunks(userQuery, limit = 5, similarityThreshold = 0.5) {
+async function searchSimilarChunks(userQuery, limit = 5, similarityThreshold = 0.5, repositoryId = null) {
     try {
-        console.log(`Embedding user query: "${userQuery}"`);
+        console.log(`Embedding user query: "${userQuery}"` + (repositoryId ? ` for repo: ${repositoryId.substring(0, 50)}...` : ''));
 
         // 1. Generate the vector for the user's query (Must use the exact same model!)
         const embeddingResponse = await openai.embeddings.create({
@@ -86,12 +87,22 @@ async function searchSimilarChunks(userQuery, limit = 5, similarityThreshold = 0
         const { data, error } = await supabase.rpc('match_code_chunks', {
             query_embedding: queryVector,
             match_threshold: similarityThreshold, // e.g. 0.5 (only return semi-relevant results)
-            match_count: limit                    // How many matches to return
+            match_count: limit * 2  // Get more to filter by repo
         });
 
         if (error) throw error;
 
-        return data; // Returns array of matching rows with their similarity scores
+        // Filter by repositoryId if provided
+        let results = data || [];
+        if (repositoryId) {
+            results = results.filter(chunk => {
+                const metadata = typeof chunk.metadata === 'string' ? JSON.parse(chunk.metadata) : chunk.metadata;
+                return metadata.repositoryId === repositoryId;
+            });
+        }
+
+        // Return only the requested limit
+        return results.slice(0, limit);
 
     } catch (error) {
         console.error("Search pipeline error:", error.message);
