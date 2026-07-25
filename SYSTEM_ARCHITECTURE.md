@@ -41,6 +41,12 @@ A full-stack application that analyzes GitHub repositories by cloning them, brea
 │  └─ POST /api/link ──→ uploader controller                      │
 │                                                                   │
 │  controllers/uploader.js (MAIN PIPELINE)                        │
+│  ├─ Step 0: Clear Database                                      │
+│  │          utils/vectorService.js → clearDatabase()           │
+│  │          ├─ Delete ALL chunks from previous repos            │
+│  │          ├─ Ensures fresh analysis for each new repo         │
+│  │          └─ Prevents cross-repo data contamination           │
+│  │                                                               │
 │  ├─ Step 1: Git Clone                                           │
 │  │          execFile('git clone --depth 1 <url> <targetPath>') │
 │  │          Location: backend/cloned_repos/repo-<timestamp>/   │

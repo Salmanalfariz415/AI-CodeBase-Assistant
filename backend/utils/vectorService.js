@@ -110,4 +110,26 @@ async function searchSimilarChunks(userQuery, limit = 5, similarityThreshold = 0
     }
 }
 
-module.exports = { generateEmbeddings, storeInSupabase, searchSimilarChunks };
+async function clearDatabase() {
+    try {
+        console.log("[VECTOR_SERVICE] Clearing all chunks from database...");
+        
+        // Delete all records from code_chunks table
+        const { error } = await supabase
+            .from('code_chunks')
+            .delete()
+            .gte('id', 0); // This deletes all rows (id >= 0 matches everything)
+        
+        if (error) {
+            throw new Error(`Failed to clear database: ${error.message}`);
+        }
+        
+        console.log("[VECTOR_SERVICE] Database cleared successfully!");
+        return true;
+    } catch (error) {
+        console.error("Error clearing database:", error.message);
+        throw error;
+    }
+}
+
+module.exports = { generateEmbeddings, storeInSupabase, searchSimilarChunks, clearDatabase };

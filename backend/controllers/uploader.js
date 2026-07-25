@@ -2,7 +2,7 @@ const { execFile } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { getAllFiles, chunkFileContent } = require('../utils/chunker');
-const { generateEmbeddings, storeInSupabase } = require('../utils/vectorService');
+const { generateEmbeddings, storeInSupabase, clearDatabase } = require('../utils/vectorService');
 const { generateReadme } = require('../utils/readmeGenerator');
 
 const uploader = (req, res) => {
@@ -23,6 +23,10 @@ const uploader = (req, res) => {
         // Handle async operations properly
         (async () => {
             try {
+                // Step 0: Clear database for fresh analysis
+                console.log('[UPLOADER] Clearing database for fresh analysis...');
+                await clearDatabase();
+                
                 console.log('[UPLOADER] Getting all files...');
                 const allFiles = getAllFiles(targetPath);
                 console.log(`[UPLOADER] Found ${allFiles.length} files`);
